@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tribal Connect — Tribal Arts Marketplace (Offline-first)</title>
+  <style>
+    :root{
+      --accent:#b04224; --accent2:#f0c36d; --card:#fff6ee; --bg:#fffaf6;
+      --glass: rgba(255,255,255,0.6);
+    }
+    html,body{height:100%; margin:0; font-family: "Segoe UI", Roboto, Arial, sans-serif; background: radial-gradient(circle at 10% 10%, #fff9f0, var(--bg)); color:#2b2b2b;}
+    header{padding:18px; display:flex; align-items:center; gap:16px; background: linear-gradient(90deg,var(--accent) 0%, #8b3a2a 100%); color:white; box-shadow:0 4px 12px rgba(0,0,0,0.12);}
+    header h1{margin:0; font-size:20px; letter-spacing:0.6px;}
+    .container{max-width:1100px; margin:22px auto; padding:20px;}
+    .hero{display:flex; gap:20px; align-items:center; background: linear-gradient(120deg, rgba(176,66,36,0.08), rgba(240,195,109,0.06)); padding:20px; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+    .hero .left{flex:1}
+    .hero h2{margin:6px 0 0 0; color:var(--accent);}
+    .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:18px;}
+    .card{background:linear-gradient(180deg,var(--card), white); border-radius:12px; padding:12px; box-shadow:0 8px 20px rgba(0,0,0,0.06);}
+    .thumb{height:160px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, #fff1e8, #ffe9d6); font-weight:700; color:#7a3b2b;}
+    .meta{display:flex; justify-content:space-between; align-items:center; margin-top:8px;}
+    button{background:var(--accent); border:none; color:white; padding:8px 10px; border-radius:8px; cursor:pointer;}
+    .muted{color:#666; font-size:13px}
+    footer{margin-top:26px; text-align:center; color:#666; font-size:13px}
+    form{display:grid; gap:8px;}
+    input,textarea,select{padding:8px;border-radius:8px;border:1px solid #e3d7c8}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .small{font-size:13px; padding:6px 8px; border-radius:8px; background:#fff}
+    nav{display:flex; gap:8px; flex-wrap:wrap}
+    .badge{background:var(--accent2); color:#5a2b12; padding:6px 8px; border-radius:999px; font-weight:700}
+    .panel{padding:12px; border-radius:8px; background:linear-gradient(180deg,#fff,#fffaf0); border:1px solid rgba(200,160,120,0.08)}
+    .cart-list{max-height:240px; overflow:auto}
+    .center{display:flex; align-items:center; justify-content:center}
+    /* tribal pattern footer */
+    .tribal-pattern{height:36px; background:
+      linear-gradient(45deg, rgba(176,66,36,0.08) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(240,195,109,0.06) 25%, transparent 25%);
+      background-size:12px 12px; border-radius:6px;}
+    @media (max-width:640px){
+      header h1{font-size:16px}
+      .thumb{height:120px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#f7d9b2,#b04224);display:flex;align-items:center;justify-content:center;font-weight:800;color:white">TC</div>
+    <div>
+      <h1>Tribal Connect</h1>
+      <div style="font-size:12px; opacity:0.95">Connecting remote tribal artisans with the world — offline-first</div>
+    </div>
+    <nav style="margin-left:auto">
+      <div class="badge">Offline-first</div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="left">
+        <h2>Bring tribal crafts to every home</h2>
+        <p class="muted">If one person in a village has network, they become a local ambassador — they can share product lists, collect orders, and sync them for artisans to receive payment or dispatch.</p>
+        <div class="row" style="margin-top:10px;">
+          <button onclick="openSection('catalog')">View Catalog</button>
+          <button onclick="openSection('workshop')">Workshop Registration</button>
+          <button onclick="openSection('ambassador')">Ambassador Tools</button>
+        </div>
+      </div>
+      <div style="width:320px">
+        <div class="panel center" style="height:160px; border-radius:12px;">
+          <div>
+            <div style="font-weight:700; font-size:18px">How it works</div>
+            <ol style="padding-left:18px; margin:8px 0 0 0">
+              <li class="muted">Local user opens the site (works offline after first load)</li>
+              <li class="muted">They browse, add to cart, and export a “share packet” (JSON file)</li>
+              <li class="muted">Ambassador imports packet on a networked phone and syncs with server</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catalog -->
+    <section id="catalog" style="margin-top:20px">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+        <h3 style="margin:0">Tribal Art Catalog</h3>
+        <div class="small">Cached for offline use</div>
+      </div>
+
+      <div class="grid" id="products"></div>
+
+      <div style="margin-top:14px; display:flex; gap:8px; align-items:center">
+        <div class="card" style="min-width:280px; flex:0 0 340px">
+          <h4 style="margin:6px 0 6px 0">Cart & Offline Orders</h4>
+          <div class="cart-list" id="cartList"></div>
+          <div style="margin-top:8px; display:flex; gap:6px">
+            <button onclick="exportPacket()">Export Share Packet (Save file)</button>
+            <button onclick="saveOrder()">Queue Order Locally</button>
+          </div>
+          <div style="margin-top:8px" class="muted">You can import this packet on another device (Ambassador) using the "Import Packet" tool below.</div>
+        </div>
+
+        <div class="card" style="flex:1">
+          <h4 style="margin:6px 0">Quick Actions</h4>
+          <div class="row">
+            <input id="importFile" type="file" accept="application/json" />
+            <button onclick="handleImport()">Import Packet</button>
+            <button onclick="trySync()">Ambassador: Try Sync (simulate)</button>
+            <button onclick="clearQueues()">Clear Queues</button>
+          </div>
+
+          <div style="margin-top:10px">
+            <div style="font-weight:700">Queued packets</div>
+            <pre id="packetsPre" style="background:#fff; padding:8px; border-radius:8px; max-height:120px; overflow:auto"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workshop -->
+    <section id="workshop" style="margin-top:22px">
+      <h3>Workshop & Promotion</h3>
+      <div class="grid">
+        <div class="card">
+          <h4>Register for Workshop</h4>
+          <form id="workshopForm" onsubmit="event.preventDefault(); registerWorkshop();">
+            <input id="w_name" placeholder="Your name (or village name)" required />
+            <input id="w_phone" placeholder="Phone / Contact (optional)" />
+            <textarea id="w_details" placeholder="Tell us about the craft you'd like to promote" rows="3"></textarea>
+            <div class="row">
+              <button type="submit">Register</button>
+              <button type="button" onclick="exportWorkshopPacket()">Export Registration</button>
+            </div>
+          </form>
+          <div id="workshopMsg" class="muted" style="margin-top:8px"></div>
+        </div>
+
+        <div class="card">
+          <h4>Promote Locally</h4>
+          <p class="muted">Print or save the product list and show to visitors, or pass exported packets (USB/phone-to-phone) to the ambassador who has network.</p>
+          <div style="margin-top:8px">
+            <button onclick="downloadCatalog()">Download Catalog (JSON)</button>
+            <button onclick="generateCatalogQRCode()">Generate QR Data (copyable)</button>
+            <div id="qrData" style="word-break:break-word; margin-top:8px; color:#5a3b2a"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ambassador -->
+    <section id="ambassador" style="margin-top:22px">
+      <h3>Ambassador Tools (for the person with network)</h3>
+      <div class="grid">
+        <div class="card">
+          <h4>Ambassador Registration</h4>
+          <form id="ambForm" onsubmit="event.preventDefault(); registerAmbassador();">
+            <input id="a_name" placeholder="Ambassador name" required />
+            <input id="a_contact" placeholder="Contact (phone/email)" />
+            <div class="row">
+              <button type="submit">Save Ambassador</button>
+              <button type="button" onclick="exportAmbassador()">Export Ambassador Info</button>
+            </div>
+          </form>
+          <div id="ambMsg" class="muted" style="margin-top:8px"></div>
+        </div>
+
+        <div class="card">
+          <h4>Import / Sync</h4>
+          <p class="muted">If someone from a remote area gives you a JSON packet (file), pick it and click Import. Then press "Sync" to send it to the central server (simulated).</p>
+
+          <div class="row">
+            <input id="imp" type="file" accept="application/json" />
+            <button onclick="ambImport()">Import Packet</button>
+            <button onclick="ambSync()">Sync All Packets to Server</button>
+          </div>
+          <div id="syncLog" style="margin-top:8px; font-size:13px; color:#444"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="tribal-pattern" style="margin:6px auto 10px auto; width:140px"></div>
+      Tribal Connect prototype — works offline. Use "Export Share Packet" to pass data between devices.
+    </footer>
+  </main>
+
+<script>
+/* ---------- Sample product data ---------- */
+const sampleProducts = [
+  {id: 't001', title:'Handwoven Dhokra Necklace', price: 1200, artisan:'Tribe A', desc:'Brass alloy, handcrafted.'},
+  {id: 't002', title:'Warli Painted Plate', price: 800, artisan:'Tribe B', desc:'Natural paints on terracotta.'},
+  {id: 't003', title:'Kalamkari Scarf', price: 600, artisan:'Tribe C', desc:'Natural dyes hand-blocked.'},
+  {id: 't004', title:'Bamboo Basket (Large)', price: 450, artisan:'Tribe D', desc:'Woven bamboo, sturdy.'},
+];
+
+/* ---------- Basic offline cache via Service Worker (in-page) ---------- */
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE_NAME = 'tribal-connect-v1';
+    const FILES = ['/', location.href];
+    self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(FILES))); });
+    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{ caches.open(CACHE_NAME).then(c=>c.put(e.request, resp.clone())); return resp;})).catch(()=>caches.match('/')));
+    });
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob))
+    .catch(err => console.log('SW register failed', err));
+}
+
+/* ---------- Render products ---------- */
+function renderProducts(){
+  const el = document.getElementById('products');
+  el.innerHTML = '';
+  sampleProducts.forEach(p => {
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `
+      <div class="thumb">${p.title.split(' ')[0]}</div>
+      <div style="margin-top:8px"><strong>${p.title}</strong></div>
+      <div class="muted" style="font-size:13px">${p.artisan} • ₹${p.price}</div>
+      <div style="margin-top:8px" class="meta">
+        <div class="muted">${p.desc}</div>
+        <div><button onclick='addToCart("${p.id}")'>Add</button></div>
+      </div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+/* ---------- Cart & queue ---------- */
+let cart = JSON.parse(localStorage.getItem('tc_cart')||'[]');
+function addToCart(id){
+  const p = sampleProducts.find(x=>x.id===id);
+  cart.push({...p, qty:1});
+  localStorage.setItem('tc_cart', JSON.stringify(cart));
+  renderCart();
+  alert('Added to cart — you can export the share packet to pass to an ambassador.');
+}
+function renderCart(){
+  const el = document.getElementById('cartList');
+  if(!cart.length){ el.innerHTML = '<div class="muted">Cart is empty</div>'; return; }
+  el.innerHTML = cart.map((c,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee">
+    <div><strong>${c.title}</strong><div class="muted">₹${c.price} • ${c.artisan}</div></div>
+    <div style="text-align:right"><div>Qty: ${c.qty}</div><div style="margin-top:6px"><button onclick="removeFromCart(${i})">Remove</button></div></div>
+  </div>`).join('');
+}
+function removeFromCart(i){ cart.splice(i,1); localStorage.setItem('tc_cart', JSON.stringify(cart)); renderCart(); }
+
+/* ---------- Export / Import packets ---------- */
+function exportPacket(){
+  if(!cart.length){ alert('Cart empty — add items first.'); return; }
+  const packet = {type:'order', createdAt: new Date().toISOString(), items: cart, meta:{location:'remote-village', note:'exported-by-user'}};
+  const blob = new Blob([JSON.stringify(packet, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`tribal-order-${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url);
+  alert('Share packet saved. Pass this file to your ambassador (USB / Bluetooth / phone).');
+}
+
+function handleImport(){
+  const f = document.getElementById('importFile').files[0];
+  if(!f){ alert('Choose a JSON file first'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const obj = JSON.parse(reader.result);
+      queuePacket(obj);
+      alert('Packet imported into local queue.');
+    }catch(e){ alert('Invalid JSON'); }
+  };
+  reader.readAsText(f);
+}
+
+/* maintain a queue of imported packets */
+function queuePacket(pkt){
+  const q = JSON.parse(localStorage.getItem('tc_packets')||'[]');
+  q.push(pkt);
+  localStorage.setItem('tc_packets', JSON.stringify(q));
+  updatePacketsDisplay();
+}
+function updatePacketsDisplay(){ document.getElementById('packetsPre').textContent = localStorage.getItem('tc_packets')||'[]'; }
+
+/* ---------- Save order locally (queued) ---------- */
+function saveOrder(){
+  if(!cart.length){ alert('Cart empty'); return; }
+  const pkt = {type:'order', createdAt:new Date().toISOString(), items:cart, meta:{savedLocally:true}};
+  queuePacket(pkt);
+  cart = []; localStorage.setItem('tc_cart','[]'); renderCart();
+  alert('Order queued locally. Ambassador can import and sync it later.');
+}
+
+/* ---------- Workshop / Ambassador forms ---------- */
+function registerWorkshop(){
+  const name = document.getElementById('w_name').value.trim();
+  const phone = document.getElementById('w_phone').value.trim();
+  const details = document.getElementById('w_details').value.trim();
+  if(!name){ alert('Enter a name'); return; }
+  const reg = {type:'workshop-reg', createdAt:new Date().toISOString(), data:{name,phone,details}};
+  queuePacket(reg);
+  document.getElementById('workshopMsg').textContent = 'Workshop registration queued locally.';
+  document.getElementById('workshopForm').reset();
+}
+function exportWorkshopPacket(){
+  const name = document.getElementById('w_name').value.trim();
+  if(!name){ alert('Enter your name to export'); return; }
+  const pkt = {type:'workshop-reg', createdAt:new Date().toISOString(), data:{name,phone:document.getElementById('w_phone').value, details:document.getElementById('w_details').value}};
+  const blob = new Blob([JSON.stringify(pkt,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='workshop-'+Date.now()+'.json'; a.click();
+}
+
+/* Ambassador */
+function registerAmbassador(){
+  const name = document.getElementById('a_name').value.trim();
+  const contact = document.getElementById('a_contact').value.trim();
+  if(!name){ alert('Name required'); return; }
+  const amb = {type:'ambassador', createdAt:new Date().toISOString(), data:{name,contact}};
+  localStorage.setItem('tc_ambassador', JSON.stringify(amb));
+  document.getElementById('ambMsg').textContent = 'Ambassador info saved locally.';
+}
+function exportAmbassador(){
+  const amb = localStorage.getItem('tc_ambassador');
+  if(!amb){ alert('No ambassador saved'); return; }
+  const blob = new Blob([amb], {type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ambassador.json'; a.click();
+}
+
+/* Import for Ambassador area */
+function ambImport(){
+  const f = document.getElementById('imp').files[0];
+  if(!f){ alert('Choose a JSON file'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const obj = JSON.parse(reader.result);
+      queuePacket(obj);
+      document.getElementById('syncLog').textContent = 'Imported packet to queue.';
+    }catch(e){ alert('Invalid file'); }
+  };
+  reader.readAsText(f);
+}
+
+/* Simulated sync (Ambassador will POST packets to server) */
+async function ambSync(){
+  const q = JSON.parse(localStorage.getItem('tc_packets')||'[]');
+  if(!q.length){ alert('No packets to sync'); return; }
+  document.getElementById('syncLog').textContent = 'Syncing '+q.length+' packets...';
+  // Simulate network requests: here we just "send" and then clear queue
+  // In a real app you'd iterate and POST to your server endpoints.
+  try{
+    for(const pkt of q){
+      // example: await fetch('/api/sync', {method:'POST', body:JSON.stringify(pkt)});
+      await new Promise(r=>setTimeout(r,300)); // simulate latency
+    }
+    localStorage.removeItem('tc_packets');
+    updatePacketsDisplay();
+    document.getElementById('syncLog').textContent = 'Sync completed: packets sent to server.';
+    alert('Sync simulated. In production: ambassador device would upload packets to your backend.');
+  }catch(e){
+    document.getElementById('syncLog').textContent = 'Sync failed. Keep packets queued.';
+  }
+}
+
+/* helper to try sync from quick actions */
+function trySync(){ ambSync(); }
+
+/* clear queues (dev) */
+function clearQueues(){ localStorage.removeItem('tc_packets'); updatePacketsDisplay(); alert('Queues cleared.'); }
+
+/* Download catalog for show-and-tell offline */
+function downloadCatalog(){
+  const blob = new Blob([JSON.stringify({catalog: sampleProducts, generatedAt: new Date().toISOString()}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tribal-catalog.json'; a.click();
+}
+
+/* small "QR data" (text) generator - not a scannable image, but copyable data for QR generator apps */
+function generateCatalogQRCode(){
+  const text = JSON.stringify({catalog: sampleProducts.map(p=>({id:p.id,title:p.title,price:p.price}))});
+  document.getElementById('qrData').textContent = 'QR payload (copy to a QR generator app): ' + text.slice(0,800);
+}
+
+/* on load */
+renderProducts();
+renderCart();
+updatePacketsDisplay();
+
+/* open section helper */
+function openSection(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+
+/* on page unload, keep data saved */
+window.addEventListener('beforeunload', ()=>{ localStorage.setItem('tc_cart', JSON.stringify(cart)); });
+
+</script>
+</body>
+</html>
